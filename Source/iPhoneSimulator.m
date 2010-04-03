@@ -102,7 +102,6 @@
 	DTiPhoneSimulatorSessionConfig *config;
 	DTiPhoneSimulatorSession *session;
 	NSError *error;
-	char *tmp;
 
 	/* Create the app specifier */
 	appSpec = [DTiPhoneSimulatorApplicationSpecifier specifierWithApplicationPath:path];
@@ -128,13 +127,11 @@
 	[config setLocalizedClientName:@"TitaniumDeveloper"];
 
 	/* redirect stderr, maybe this could be in a cli option? */
-	tmp = getenv("STDERR");
-	if (tmp) {
-		[config setSimulatedApplicationStdErrPath:[NSString stringWithCString:tmp encoding:NSUTF8StringEncoding]];
+	if (sessionStderr) {
+		[config setSimulatedApplicationStdErrPath:sessionStderr];
 	}
-	tmp = getenv("STDOUT");
-	if (tmp) {
-		[config setSimulatedApplicationStdOutPath:[NSString stringWithCString:tmp encoding:NSUTF8StringEncoding]];
+	if (sessionStdout) {
+		[config setSimulatedApplicationStdOutPath:sessionStdout];
 	}
 	
 	// this was introduced in 3.2 of SDK
@@ -202,6 +199,8 @@
 	
 	// debug option (launch gdb)
 	debug = [args boolForKey:@"debug"];
+	sessionStderr = [args stringForKey:@"stderr"];
+	sessionStdout = [args stringForKey:@"stdout"];
 	
 	if (strcmp(cmd, "showsdks") == 0) {
 		exit([self showSDKs]);
