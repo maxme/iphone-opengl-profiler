@@ -1,16 +1,15 @@
 set breakpoint pending on
 
 break glEnableClientState
-commands 1
+commands
 f 1
 c
 end
 
 break glDisableClientState
-commands 2
+commands
 f 1
 c
 end
-
 
 c
