@@ -53,6 +53,8 @@
 	fprintf(stderr, "  -stderr <stderr redirection>\n");
 	fprintf(stderr, "  -stdout <stdout redirection>\n");
 	fprintf(stderr, "  -debug <YES|NO>\n");
+	fprintf(stderr, "  -gdbcommands <gdb commands file>\n");
+
 }
 
 
@@ -72,7 +74,7 @@
 
 - (void)session:(DTiPhoneSimulatorSession *)session didEndWithError:(NSError *)error {
 	nsprintf(@"Session did end with error %@", error);
-	
+
 	if (error != nil)
 		exit(EXIT_FAILURE);
 
@@ -85,7 +87,14 @@
 		nsprintf(@"Session started with pid %@", [session simulatedApplicationPID]);
 		if (debug) {
 			// launch gdb (and continue execution) maybe we should fork and exec?
-			system([[NSString stringWithFormat:@"echo c | /usr/bin/gdb --pid %@", [session simulatedApplicationPID]] UTF8String]);
+			NSString *command = [NSString stringWithFormat:@"/usr/bin/gdb --pid %@", [session simulatedApplicationPID]];
+			nsprintf(gdbcommands);
+
+			if (gdbcommands) {
+				command = [command stringByAppendingString:[NSString stringWithFormat:@" -x %@", gdbcommands]];
+			}
+			nsprintf(command);
+			system([command UTF8String]);
 		}
 	} else {
 		nsprintf(@"Session could not be started: %@", error);
@@ -112,7 +121,7 @@
 	nsprintf(@"App Spec: %@", appSpec);
 
 	/* Load the default SDK root */
-	
+
 	nsprintf(@"SDK Root: %@", sdkRoot);
 
 	/* Set up the session configuration */
@@ -133,7 +142,7 @@
 	if (sessionStdout) {
 		[config setSimulatedApplicationStdOutPath:sessionStdout];
 	}
-	
+
 	// this was introduced in 3.2 of SDK
 	if ([config respondsToSelector:@selector(setSimulatedDeviceFamily:)])
 	{
@@ -188,20 +197,21 @@
 		// first non option argument is the command
 		if (argv[i][0] != '-') {
 			cmd = argv[i];
-			cmdIdx = i;	
-			break;		
+			cmdIdx = i;
+			break;
 		}
 	}
 	if (!cmd) {
 		[self printUsage];
 		exit(EXIT_FAILURE);
 	}
-	
+
 	// debug option (launch gdb)
 	debug = [args boolForKey:@"debug"];
+	gdbcommands = [args stringForKey:@"gdbcommands"];
 	sessionStderr = [args stringForKey:@"stderr"];
 	sessionStdout = [args stringForKey:@"stdout"];
-	
+
 	if (strcmp(cmd, "showsdks") == 0) {
 		exit([self showSDKs]);
 	} else if (strcmp(cmd, "launch") == 0) {

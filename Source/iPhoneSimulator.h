@@ -37,7 +37,7 @@
 @private
 	DTiPhoneSimulatorSystemRoot *sdkRoot;
 	BOOL debug;
-	NSString *sessionStderr, *sessionStdout;
+	NSString *sessionStderr, *sessionStdout, *gdbcommands;
 }
 
 - (void) runWithArgc: (int) argc argv: (char **) argv;
