@@ -1,0 +1,11 @@
+break glEnableClientState
+commands 1
+f 1
+c
+end
+
+break glDisableClientState
+commands 1
+f 1
+c
+end
