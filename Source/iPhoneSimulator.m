@@ -88,8 +88,6 @@
 		if (debug) {
 			// launch gdb (and continue execution) maybe we should fork and exec?
 			NSString *command = [NSString stringWithFormat:@"/usr/bin/gdb --pid %@", [session simulatedApplicationPID]];
-			nsprintf(gdbcommands);
-
 			if (gdbcommands) {
 				command = [command stringByAppendingString:[NSString stringWithFormat:@" -x %@", gdbcommands]];
 			}
