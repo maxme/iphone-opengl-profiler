@@ -1,6 +1,8 @@
 build
 iphonesim
 
+*~
+
 # XCode projects
 *.pbxuser
 *.perspective
