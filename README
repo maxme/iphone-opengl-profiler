@@ -1,31 +1,58 @@
-  iPhone Simulator 
-  ----------------
+iPhone Simulator 
+----------------
+ 
+The iPhone Simulator is a simple command line utility for 
+launching an iphone application in the simulator. This allows
+for nice things like automated testing of unit tests, etc without
+having to open XCode.
 
-  The iPhone Simulator is a simple command line utility for 
-  launching an iphone application in the simulator. This allows
-  for nice things like automated testing of unit tests, etc without
-  having to open XCode.
+You can run the application by first building your application in
+xcode using the xcodebuild command from the command line.  You can
+then run it in the simulator using the following as an example:
 
-  The original code was written by Landon Fuller (with license
-  below).  Minor modifications made by Jeff Haynie (Appcelerator).
+./iphonesim launch ~/tmp/yourproject/build/Debug.simulator/yourproject.app
 
-
-  You can run the application by first building your application in
-  xcode using the xcodebuild command from the command line.  You can
-  then run it in the simulator using the following as an example:
-
-  ./iphonesim launch ~/tmp/yourproject/build/Debug.simulator/yourproject.app
-
-  You need to point to either Debug.simulator or Release.simulator based 
-  on which build type you built with.
+You need to point to either Debug.simulator or Release.simulator based 
+on which build type you built with.
 
 
-  Cheers!
+USAGE
+-----
+
+iphonesim <command> <options>
+
+Commands:
+  showsdks
+  launch <application path>
+Options:
+  -sdkVersion <sdk version>
+  -family <family>
+  -uuid <uuid>
+  -stderr <stderr redirection>
+  -stdout <stdout redirection>
+  -debug <YES|NO>
+  -gdbcommands <gdb commands file>
+
+
+Examples
+--------
+Use with gdb and gdb commands:
+$ ./iphonesim launch XXX.app -debug YES -sdkVersion "3.0" -gdbcommands gdbscripts/opengl-state-tracer.txt
+
+
+
+
+
+
+
+
+
+----
+Main launcher code written by:
 
   Jeff Haynie
   jhaynie@appcelerator.com
     
-
 
   Author: Landon Fuller <landonf@plausiblelabs.com>
   Copyright (c) 2008 Plausible Labs Cooperative, Inc.
@@ -55,4 +82,7 @@
 
   Modifications made by Appcelerator, Inc. relicensed under
   the same license as above.
+
+  Modifications made by Maxime Biais relicensed under the same license
+  as above.
 
