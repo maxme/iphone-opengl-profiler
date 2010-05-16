@@ -1,0 +1,89 @@
+# Howto profile n iPhone OpenGL ES application
+
+## Introduction
+
+This article explain how to trace OpenGL ES function calls of your
+iPhone application but you can trace any other kind of function call
+using this technique. Note that I'm not sure it's the best way to do
+that but I didn't found any other tool able to trace _all_ function
+calls (Instruments can sample process usage, but I didn't manage to
+trace all function calls with it). 
+
+The technique is based on a base gdb script:
+
+1. break on glSomething functions,
+
+2. for each break, use [_commands_](http://sourceware.org/gdb/current/onlinedocs/gdb/Break-Commands.html#Break-Commands) to print the frame #1 (where the glSomething has been called in your source code).
+
+
+Sample translation for the glEnableClientState function:
+
+    set breakpoint pending on # Enable breakpoints on symbols not yet loaded
+
+    break glEnableClientState
+    commands      # start command when the break is 
+    silent
+    frame 1       # print the frame #1
+    continue      # continue to the next break
+    end           # end the command list
+
+
+Following scripts and iphonesim source code is available on my [iphone-opengl-profiler github project page](http://github.com/maxme/iphone-opengl-profiler)
+
+Note: if you want to execute the following guide, you should download
+the projet and compile the _iphonesim_ binary.
+
+## Example use
+### Generate gdb script
+
+I wrote a small script to generate the list of glFunctions you use in
+your program, for example for the _OpenGLES_ sample project:
+
+    $ gdbscripts/listGlFunctions.sh "/Users/max/work/iphone apps/OpenGLES/build/Debug-iphonesimulator/OpenGLES.app/OpenGLES" > glFunctions.txt
+
+Then run the following script to generate the gdb script from your
+function list:
+
+    $ gdbscripts/generate-gdb-trace.sh glFunctions.txt > gdbscript.txt
+
+Now you're ready to launch your application and attach gdb.
+
+### Run your iphone app in the simulator
+
+Run the iphonesim binary that will launch your application in the
+simulator, run gdb and attach it to your process. 
+
+    $ iphonesim launch "/Users/max/work/iphone apps/OpenGLES/build/Debug-iphonesimulator/OpenGLES.app/OpenGLES" -debug YES -sdkVersion "3.0" -gdbcommands gdbscripts.txt > gdb-trace.log
+
+Ctrl-C when you decide to stop your applicaton (when you think you
+gathered all profiling data you need).
+
+### Analyze gathered data
+
+I wrote a last script to filter glSomething commands, you can run it:
+
+    $ cat gdb-trace.log | gdbscripts/opengl-state-tracer.sh|head
+    glGenFramebuffersOES(1, &ViewFramebuffer);
+    glGenRenderbuffersOES(1, &ViewRenderbuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, ViewRenderbuffer);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
+    glGenRenderbuffersOES(1, &ViewDepthRenderbuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, ViewDepthRenderbuffer);
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, ViewFramebuffer);
+    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, ViewRenderbuffer);
+    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, ViewDepthRenderbuffer);
+
+Get basic statistics:
+
+    $ cat gdb-trace.log | gdbscripts/opengl-state-tracer.sh | sort|uniq -c|sort -n -r
+    461 glMatrixMode(GL_TEXTURE);
+    461 glLoadIdentity();
+    249 glMatrixMode(GL_MODELVIEW);
+    198 glMatrixMode(GL_PROJECTION);
+    ...
+
+Have fun profiling you're OpenGL ES iPhone applications !
+
+
+### 
